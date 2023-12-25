@@ -1,0 +1,145 @@
+Html:
+====
+
+ <p class="product-single__sku">
+                  {%- if current_variant.sku -%}
+                    {{ current_variant.sku }}
+                  {%- endif -%}
+                </p>
+
+
+
+
+
+   <div class="product-block product-block--price" {{ block.shopify_attributes }}>
+                      {%- assign hide_sale_price = true -%}
+                      {%- if product.compare_at_price_max > product.price -%}
+                        {%- if current_variant.compare_at_price > current_variant.price -%}
+                          {%- assign hide_sale_price = false -%}
+                        {%- endif -%}
+                        <span
+                          data-a11y-price
+                          class="visually-hidden"
+                          aria-hidden="{{ hide_sale_price }}">
+                            {{ 'products.general.regular_price' | t }}
+                        </span>
+                        <span data-product-price-wrap class="product__price--compares {% if hide_sale_price %}  hide{% endif %}">
+                          <span data-compare-price class="product__price product__price--compare">
+                            {%- if current_variant.compare_at_price > current_variant.price -%}
+                              {{ current_variant.compare_at_price | money }}
+                            {%- endif -%}
+                          </span>
+                        </span>
+                        <span data-compare-price-a11y class="visually-hidden">{{ 'products.general.sale_price' | t }}</span>
+                      {%- else -%}
+                        <span data-a11y-price class="visually-hidden">{{ 'products.general.regular_price' | t }}</span>
+                      {%- endif -%}
+
+                      <span data-product-price
+                        class="product-price{% if current_variant.compare_at_price > current_variant.price %} on-sale{% endif %}">
+                        {%- unless product.empty? -%}
+                          {{ current_variant.price | money }}
+                        {%- else -%}
+                          {{ 1999 | money }}
+                        {%- endunless -%}
+                      </span>
+
+
+
+
+<div class="discount">ddd</div>
+
+
+  
+  var product = {{ product | json }}
+  
+  document.querySelectorAll('input[type="radio"]').forEach( radio =>{
+  radio.addEventListener("change", () => {
+
+     //Selected Option
+    var selectedOptions = [];
+    document.querySelectorAll('input[type="radio"]:checked').forEach( radio =>{
+        selectedOptions.push(radio.value)
+    })
+
+
+     //Finding Matched Variant
+    var matchedVariant = product.variants.find(variant => {
+      var pass = true;
+      for(var i=0; i<selectedOptions.length; i++){
+        if(selectedOptions.indexOf(variant.options[i]) == -1){
+          pass = false
+          break
+        }
+      }
+      return pass
+    })
+
+
+    //Change Product Variant Id
+    document.querySelector('#product-id').value = matchedVariant.id
+
+     //Change url
+    var url = new URLParse(window.location.href, true)
+    url.query.variant =  matchedVariant.id
+    window.history.replaceState(null, null, url.toString());
+
+    
+    //Different descrition for different variant
+    const allvariant = JSON.parse(document.querySelector('#variant-metafield-data').textContent)
+    const variantdetails = document.querySelector('.variant-details');
+    variantdetails.textContent = allvariant[matchedVariant.id];
+    
+
+    //Different sku for different variant
+     document.querySelector('.product-single__sku').textContent = matchedVariant.sku;
+
+
+
+    
+     if(matchedVariant.compare_at_price > matchedVariant.price){
+       var discount = document.querySelector('.discount')
+       document.querySelector('.discount').classList.remove('hide')
+      var rprices = parseInt(document.querySelector('.product-price').textContent =matchedVariant.price)
+      var cprices = parseInt(document.querySelector('.product__price--compare').textContent =matchedVariant.compare_at_price)
+      var result1 = cprices - rprices
+      var result2 = result1 * 100 / cprices
+      var final = formatMoney(result1, "{{ shop.money_format }}") 
+       discount.textContent=`${result2} % OFF`
+     }else{
+       document.querySelector('.discount').classList.add('hide')
+     }
+
+    
+ 
+    
+    //Different price for different variant
+   var rprice = document.querySelector('.product-price').textContent = formatMoney(matchedVariant.price, "{{ shop.money_format }}") 
+  var cprice = document.querySelector('.product__price--compare').textContent = formatMoney(matchedVariant.compare_at_price, "{{ shop.money_format }}") 
+ matchedVariant.compare_at_price > matchedVariant.price ?
+document.querySelector('.product__price--compares').classList.remove('hide') :
+document.querySelector('.product__price--compares').classList.add('hide')
+
+  
+    
+   });
+    
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
