@@ -127,6 +127,87 @@ document.querySelector('.product__price--compares').classList.add('hide')
   });
 
 
+update code:
+==========
+<script>
+
+var product = {{ product | json }};
+
+// Format money
+function formatMoney(cents) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    currencyDisplay: 'symbol'
+  }).format(cents / 100);
+}
+
+// Update the variant based on select values
+function updateSelectedVariant() {
+  var selectedOptions = [];
+  document.querySelectorAll('.delivery-options select').forEach(select => {
+    selectedOptions.push(select.value);
+  });
+
+  var matchedVariant = product.variants.find(variant => {
+    return variant.options.every((opt, i) => opt === selectedOptions[i]);
+  });
+
+  if (!matchedVariant) return;
+
+  // Update product ID input
+  document.querySelector('#product-id').value = matchedVariant.id;
+
+  // Update URL
+  var url = new URL(window.location.href);
+  url.searchParams.set('variant', matchedVariant.id);
+  window.history.replaceState(null, null, url.toString());
+
+  // Update price display
+  document.querySelector('#js-product-price').textContent = formatMoney(matchedVariant.price);
+  document.querySelector('.compare').textContent = formatMoney(matchedVariant.compare_at_price);
+  if (matchedVariant.compare_at_price > matchedVariant.price) {
+    document.querySelector('.compare').classList.remove('hide');
+  } else {
+    document.querySelector('.compare').classList.add('hide');
+  }
+}
+
+// Attach event listeners to dropdowns
+document.querySelectorAll('.delivery-options select').forEach(select => {
+  select.addEventListener("change", updateSelectedVariant);
+});
+
+// On page load: sync selects with variant param in URL
+window.addEventListener('DOMContentLoaded', () => {
+  var urlParams = new URLSearchParams(window.location.search);
+  var variantId = urlParams.get('variant');
+
+  if (variantId) {
+    var matchedVariant = product.variants.find(variant => variant.id == variantId);
+
+    if (matchedVariant) {
+      // Set selects to match the variant options
+      document.querySelectorAll('.delivery-options select').forEach((select, index) => {
+        select.value = matchedVariant.options[index];
+      });
+
+      // Update product ID input
+      document.querySelector('#product-id').value = matchedVariant.id;
+
+      // Update price display
+      document.querySelector('#js-product-price').textContent = formatMoney(matchedVariant.price);
+      document.querySelector('.compare').textContent = formatMoney(matchedVariant.compare_at_price);
+      if (matchedVariant.compare_at_price > matchedVariant.price) {
+        document.querySelector('.compare').classList.remove('hide');
+      } else {
+        document.querySelector('.compare').classList.add('hide');
+      }
+    }
+  }
+});
+
+</script>
 
 
 
